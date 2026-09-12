@@ -1,115 +1,504 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>눈치보지마육6!</title>
-
-  <link rel="stylesheet" href="login.css">    <!-- A 담당 -->
-  <link rel="stylesheet" href="detail.css">   <!-- B 담당 -->
-  <link rel="stylesheet" href="seatmap.css">  <!-- C 담당 -->
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자리6 - 6호선 좌석 정보 공유</title>
   <style>
-    /* ⚠️ 공용 규칙 — 셋이 같이 있을 때만 수정 */
-    body { font-family: sans-serif; margin: 0; }
-    .screen { display: none; padding: 16px; }
-    .screen.active { display: block; }
-    .topbar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 16px; border-bottom: 1px solid #ddd;
+    :root{
+      --line6:#8B50A4;
+      --line6-dark:#6d377f;
+      --bg:#f6f3f8;
+      --card:#ffffff;
+      --text:#25202a;
+      --muted:#746d79;
+      --border:#e7deeb;
+      --pink:#ffe6ef;
+      --yellow:#fff4c7;
+      --green:#e6f7ee;
+      --danger:#d64a61;
+      --shadow:0 12px 32px rgba(55,33,65,.10);
     }
-    .popup-bg {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 100;
-    }
-    .popup-bg.active { display: flex; align-items: center; justify-content: center; }
-    .popup {
-      background: #fff; padding: 24px; border-radius: 12px;
-      max-width: 360px; width: 90%; max-height: 85vh; overflow-y: auto;
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+    .screen{min-height:100vh}
+    .topbar{height:72px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}
+    .brand{font-size:24px;font-weight:800;color:var(--line6);display:flex;align-items:center;gap:9px}
+    .brand-dot{width:16px;height:16px;border-radius:50%;background:var(--line6);display:inline-block}
+    .btn{border:0;border-radius:12px;padding:12px 18px;font-weight:700}
+    .btn-primary{background:var(--line6);color:white}
+    .btn-primary:hover{background:var(--line6-dark)}
+    .btn-light{background:#f2edf4;color:var(--line6)}
+    .btn-outline{background:white;color:var(--line6);border:1px solid #cdb8d5}
+    .btn-danger{background:#fff0f2;color:var(--danger)}
+    .landing{display:grid;place-items:center;padding:24px;background:linear-gradient(160deg,#f7f1fa,#ffffff 55%,#eee5f2)}
+    .hero{width:min(720px,95vw);background:white;border:1px solid var(--border);box-shadow:var(--shadow);border-radius:28px;padding:56px;text-align:center}
+    .logo-circle{width:84px;height:84px;border-radius:50%;margin:0 auto 18px;background:var(--line6);color:white;display:grid;place-items:center;font-size:31px;font-weight:900}
+    .hero h1{font-size:42px;margin:0 0 12px;color:var(--line6)}
+    .hero p{color:var(--muted);line-height:1.7;margin:0 auto 28px;max-width:520px}
+    .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .hero-actions .btn{min-width:160px}
+    .mini-note{margin-top:20px;color:#8a818e;font-size:13px}
+    .wrap{width:min(1180px,94vw);margin:28px auto 60px}
+    .grid-2{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 5px 18px rgba(55,33,65,.06);padding:22px}
+    .card h2,.card h3{margin-top:0}
+    .section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .badge{font-size:12px;font-weight:700;padding:7px 10px;border-radius:999px;background:#f0e8f3;color:var(--line6)}
+    .line-map{overflow-x:auto;padding:20px 8px 8px}
+    .station-row{display:flex;align-items:flex-start;min-width:1450px;padding-bottom:18px}
+    .station{width:82px;text-align:center;position:relative;flex:0 0 82px}
+    .station:before{content:"";position:absolute;top:11px;left:0;right:0;height:7px;background:var(--line6);z-index:0}
+    .station:first-child:before{left:50%}.station:last-child:before{right:50%}
+    .station-dot{width:29px;height:29px;border:6px solid var(--line6);background:white;border-radius:50%;position:relative;margin:0 auto 8px;z-index:1}
+    .station-name{font-size:12px;line-height:1.25;color:#554d59}
+    .predict-form{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-bottom:16px}
+    label{display:block;font-size:13px;color:var(--muted);font-weight:700;margin-bottom:7px}
+    input,select{width:100%;border:1px solid #d8cddd;border-radius:11px;background:white;padding:12px 13px;color:var(--text)}
+    input:focus,select:focus{outline:2px solid #decce6;border-color:var(--line6)}
+    .result-hero{background:linear-gradient(135deg,var(--line6),#ad78bd);color:white;border-radius:18px;padding:22px;margin:12px 0 18px}
+    .result-hero small{opacity:.9}.result-hero .big{font-size:29px;font-weight:900;margin:7px 0}.result-hero .prob{font-size:44px;font-weight:900}
+    .cars{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .car-card{border:1px solid var(--border);border-radius:14px;padding:13px;text-align:center;background:#fff}
+    .car-card.best{border:2px solid var(--line6);background:#f7f0fa}
+    .car-card strong{display:block;margin-bottom:6px}.meter{height:7px;background:#eee7f0;border-radius:999px;overflow:hidden;margin-top:8px}.meter>span{display:block;height:100%;background:var(--line6)}
+    .data-box{margin-top:17px;border-top:1px dashed var(--border);padding-top:16px}
+    .data-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    input[type=file]{max-width:100%;background:#faf8fb}
+    .small{font-size:12px;color:var(--muted);line-height:1.55}
+    .source-state{font-size:12px;padding:6px 9px;border-radius:999px;background:#f0e8f3;color:var(--line6);font-weight:700}
+    .waiting-layout{display:grid;grid-template-columns:1.05fr .95fr;gap:22px}
+    .profile-card{display:grid;grid-template-columns:58px 1fr auto;gap:13px;align-items:center;border:1px solid var(--border);border-radius:16px;padding:14px;margin:11px 0;background:white}
+    .profile-card.pregnant{background:var(--pink)}
+    .profile-card.elderly{background:var(--yellow)}
+    .profile-card.both{background:linear-gradient(90deg,var(--pink),var(--yellow))}
+    .avatar{width:54px;height:54px;border-radius:50%;background:#ddd1e2;display:grid;place-items:center;font-size:26px}
+    .profile-main b{font-size:16px}.profile-main div{font-size:13px;color:#655d69;margin-top:5px}
+    .seat-label{text-align:right;font-weight:800;color:var(--line6)}
+    .seat-map{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:15px}
+    .seat{height:48px;border-radius:10px;border:1px solid #d6c9dc;display:grid;place-items:center;font-size:13px;font-weight:700;background:white;color:#6a5f6e}
+    .seat.occupied{background:var(--line6);color:white;border-color:var(--line6)}
+    .seat.mine{outline:3px solid #43a56f}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
+    .legend span{display:flex;align-items:center;gap:5px}.sq{width:12px;height:12px;border-radius:3px;background:white;border:1px solid #cdbfd1}.sq.occ{background:var(--line6)}.sq.mine{outline:2px solid #43a56f}
+    .waiting-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(28,20,31,.45);display:grid;place-items:center;padding:18px;z-index:100}
+    .modal{width:min(560px,96vw);max-height:90vh;overflow:auto;background:white;border-radius:22px;padding:24px;box-shadow:var(--shadow)}
+    .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h2{margin:0}.x{border:0;background:#f4eff6;width:36px;height:36px;border-radius:50%}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.full{grid-column:1/-1}
+    .checks{display:flex;gap:14px;flex-wrap:wrap}.checkline{display:flex;align-items:center;gap:7px;font-size:14px}.checkline input{width:auto}
+    .toast{position:fixed;right:22px;bottom:22px;background:#262029;color:white;padding:13px 17px;border-radius:12px;box-shadow:var(--shadow);z-index:200}
+    .rank-note{padding:12px 14px;background:#faf7fb;border-radius:12px;font-size:13px;color:#665d6b;line-height:1.55;margin-top:14px}
+    .muted{color:var(--muted)}
+    @media(max-width:860px){
+      .grid-2,.waiting-layout{grid-template-columns:1fr}.predict-form{grid-template-columns:1fr 1fr}.predict-form .btn{grid-column:1/-1}.cars{grid-template-columns:repeat(2,1fr)}.hero{padding:38px 24px}.hero h1{font-size:34px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.topbar{padding:0 16px}}
   </style>
 </head>
 <body>
+  <!-- 1. 시작 화면 -->
+  <section id="screenLanding" class="screen landing">
+    <div class="hero">
+      <div class="logo-circle">6</div>
+      <h1>자리6</h1>
+      <p>6호선 통학생을 위한 좌석 정보 공유 서비스. 하차 예정 정보와 공공데이터를 함께 분석해 더 효율적인 칸을 추천합니다.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="openModal('loginModal')">로그인</button>
+        <button class="btn btn-outline" onclick="openModal('signupModal')">회원가입</button>
+      </div>
+      <div class="mini-note">해커톤 MVP · 현재 브라우저 안에서만 계정과 현장정보가 저장됩니다.</div>
+    </div>
+  </section>
 
-<!-- ============================================================
-     화면 1 — 로그인 / 회원가입          [ A 담당 ]
-     ============================================================ -->
-<div id="screen1" class="screen active">
-  <h1>눈치보지마육6!</h1>
-  <!-- A: 여기에 로그인 폼 + 로그인/회원가입 버튼 -->
-</div>
+  <!-- 2. 메인 화면 -->
+  <section id="screenMain" class="screen hidden">
+    <header class="topbar">
+      <div class="brand"><span class="brand-dot"></span>자리6</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="helloUser" class="muted" style="font-size:13px"></span>
+        <button class="btn btn-primary" onclick="showWaiting()">현장대기여부</button>
+      </div>
+    </header>
 
-<!-- 회원가입 팝업 — A 담당 -->
-<div id="signupPopup" class="popup-bg">
-  <div class="popup">
-    <h2>회원가입</h2>
-    <!-- A: 이름 / 나이 / 성별 / 임산부 / 노약자 / 아이디 / 비번 / 동의 -->
+    <main class="wrap">
+      <div class="card" style="margin-bottom:22px">
+        <div class="section-title">
+          <div><h2 style="margin-bottom:5px">6호선 노선도</h2><div class="small">프로토타입용 간이 노선도</div></div>
+          <span class="badge">LINE 6</span>
+        </div>
+        <div class="line-map"><div id="stationRow" class="station-row"></div></div>
+      </div>
+
+      <div class="grid-2">
+        <section class="card">
+          <div class="section-title">
+            <div><h2 style="margin-bottom:5px">착석 확률 예측</h2><div class="small">역·시간대 공공데이터 + 앱 내 칸별 하차예정 정보를 결합합니다.</div></div>
+            <span id="dataSourceState" class="source-state">데모 데이터 사용 중</span>
+          </div>
+
+          <div class="predict-form">
+            <div><label for="predictStation">역</label><select id="predictStation"></select></div>
+            <div><label for="predictHour">시간대</label><select id="predictHour"></select></div>
+            <button class="btn btn-primary" style="align-self:end" onclick="predictSeats()">분석하기</button>
+          </div>
+
+          <div id="predictionResult"></div>
+
+          <div class="data-box">
+            <h3 style="margin-bottom:8px">공공데이터 CSV 연결</h3>
+            <div class="small" style="margin-bottom:10px">서울교통공사의 역별·일별·시간대별 승하차 CSV를 올리면 6호선 자료만 자동 집계합니다. 또는 함께 제공한 샘플 CSV로 테스트할 수 있습니다.</div>
+            <div class="data-controls">
+              <input id="csvFile" type="file" accept=".csv,text/csv" />
+              <button class="btn btn-light" onclick="loadPublicCsv()">CSV 분석</button>
+              <button class="btn btn-outline" onclick="resetDemoData()">데모로 초기화</button>
+            </div>
+            <div id="csvStatus" class="small" style="margin-top:10px"></div>
+          </div>
+        </section>
+
+        <aside class="card">
+          <h2>추천 원리</h2>
+          <div class="rank-note"><b>1. 역·시간대 데이터</b><br>하차 인원이 상대적으로 많을수록 좌석이 새로 생길 가능성을 높게 봅니다.</div>
+          <div class="rank-note"><b>2. 현재 칸 정보</b><br>앱에 등록된 “곧 내리는 사람”과 점유 좌석 수를 반영합니다.</div>
+          <div class="rank-note"><b>3. 1~8칸 비교</b><br>각 칸의 현장 정보에 같은 역·시간대 기본 점수를 합쳐 가장 높은 칸을 추천합니다.</div>
+          <div class="rank-note" style="background:#fff8e2"><b>중요</b><br>표시되는 %는 실제 보장 확률이 아니라 해커톤용 <b>추정 점수</b>입니다. 공공데이터에는 칸별 승하차가 없으므로 칸별 차이는 앱 자체 현장데이터로 보완합니다.</div>
+        </aside>
+      </div>
+    </main>
+  </section>
+
+  <!-- 3. 현장대기 화면 -->
+  <section id="screenWaiting" class="screen hidden">
+    <header class="topbar">
+      <div class="brand"><span class="brand-dot"></span>자리6</div>
+      <button class="btn btn-light" onclick="showMain()">메인으로</button>
+    </header>
+    <main class="wrap waiting-layout">
+      <section class="card">
+        <div class="section-title">
+          <div>
+            <button class="btn btn-primary" onclick="openModal('routeModal')">출발/도착지 지정</button>
+            <div id="currentCarLabel" style="font-size:21px;font-weight:900;margin-top:14px">칸을 지정해주세요</div>
+          </div>
+          <button class="btn btn-light" onclick="refreshProfiles()">새로고침</button>
+        </div>
+        <div id="profileList"></div>
+        <div class="waiting-actions">
+          <button class="btn btn-outline" onclick="showMain()">← 돌아가기</button>
+          <button class="btn btn-primary" onclick="openModal('seatModal')">자리에 앉았어요</button>
+        </div>
+      </section>
+
+      <aside class="card">
+        <h2>칸 현황</h2>
+        <div class="small">프로필에 등록된 좌석은 점유 좌석으로 표시됩니다.</div>
+        <div id="seatMap" class="seat-map"></div>
+        <div class="legend"><span><i class="sq"></i>빈 좌석</span><span><i class="sq occ"></i>점유</span><span><i class="sq mine"></i>내 좌석</span></div>
+      </aside>
+    </main>
+  </section>
+
+  <!-- 로그인 -->
+  <div id="loginModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-head"><h2>로그인</h2><button class="x" onclick="closeModal('loginModal')">✕</button></div>
+      <div class="form-grid">
+        <div class="full"><label>아이디</label><input id="loginId" placeholder="아이디"></div>
+        <div class="full"><label>비밀번호</label><input id="loginPw" type="password" placeholder="비밀번호"></div>
+        <button class="btn btn-primary full" onclick="login()">로그인</button>
+      </div>
+    </div>
   </div>
-</div>
 
-
-<!-- ============================================================
-     화면 2 — 노선도                     [ B 담당 ]
-     ============================================================ -->
-<div id="screen2" class="screen">
-  <div class="topbar">
-    <span id="appName">눈치보지마육6!</span>
-    <button onclick="showScreen(3)">현장대기여부</button>
-  </div>
-  <!-- B: 여기에 6호선 노선도 이미지 -->
-  <div id="lineMap"></div>
-</div>
-
-
-<!-- ============================================================
-     화면 3 — 칸 현황                    [ B: 왼쪽 / C: 오른쪽 ]
-     ============================================================ -->
-<div id="screen3" class="screen">
-  <div class="topbar">
-    <button onclick="openRoutePopup()">출발/도착지 지정</button>
-    <span id="carNumberLabel"></span>
+  <!-- 회원가입 -->
+  <div id="signupModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-head"><h2>회원가입</h2><button class="x" onclick="closeModal('signupModal')">✕</button></div>
+      <div class="form-grid">
+        <div><label>이름</label><input id="suName"></div>
+        <div><label>나이</label><input id="suAge" type="number" min="1"></div>
+        <div><label>성별</label><select id="suGender"><option value="여성">여성</option><option value="남성">남성</option><option value="기타/미응답">기타/미응답</option></select></div>
+        <div><label>아이디</label><input id="suId"></div>
+        <div class="full"><label>비밀번호</label><input id="suPw" type="password"></div>
+        <div class="full checks">
+          <label class="checkline"><input id="suPregnant" type="checkbox">임산부 여부</label>
+          <label class="checkline"><input id="suElderly" type="checkbox">노약자 여부</label>
+        </div>
+        <div class="full"><label class="checkline"><input id="suAgree" type="checkbox">개인정보 수집·이용 내용을 확인했고 동의합니다.</label></div>
+        <div class="small full">※ 해커톤 데모에서는 브라우저 LocalStorage에 저장됩니다. 실제 서비스에서는 민감정보 최소수집, 암호화 및 안전한 인증 서버가 필요합니다.</div>
+        <button class="btn btn-primary full" onclick="signup()">가입하기</button>
+      </div>
+    </div>
   </div>
 
-  <div style="display:flex; gap:20px; flex-wrap:wrap;">
-    <!-- 왼쪽: 프로필 리스트 — B 담당 -->
-    <div id="profileList" style="flex:1; min-width:280px;"></div>
-
-    <!-- 오른쪽: 좌석배치도 — C 담당 -->
-    <div id="seatMap" style="flex:1; min-width:280px;"></div>
+  <!-- 출도착/칸 -->
+  <div id="routeModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-head"><h2>출발/도착지 지정</h2><button class="x" onclick="closeModal('routeModal')">✕</button></div>
+      <div class="form-grid">
+        <div><label>출발역</label><select id="routeStart"></select></div>
+        <div><label>도착역</label><select id="routeEnd"></select></div>
+        <div class="full"><label>칸 번호</label><select id="routeCar"></select></div>
+        <button class="btn btn-primary full" onclick="saveRoute()">저장</button>
+      </div>
+    </div>
   </div>
 
-  <div class="topbar" style="border-top:1px solid #ddd; border-bottom:none;">
-    <span>
-      <button onclick="showScreen(2)">돌아가기</button>
-      <button onclick="refresh()">새로고침</button>
-    </span>
-    <button onclick="openSitPopup()">착석하기</button>  <!-- C 담당 -->
+  <!-- 좌석 등록 -->
+  <div id="seatModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-head"><h2>좌석 등록</h2><button class="x" onclick="closeModal('seatModal')">✕</button></div>
+      <div class="form-grid">
+        <div class="full"><label>내 좌석번호</label><select id="mySeat"></select></div>
+        <button class="btn btn-primary full" onclick="saveSeat()">좌석 등록</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- 출발/도착지 팝업 — B 담당 -->
-<div id="routePopup" class="popup-bg">
-  <div class="popup">
-    <h2>출발/도착지 지정</h2>
-    <!-- B: 출발지 select / 도착지 select / 칸번호 input -->
-  </div>
-</div>
+  <div id="toast" class="toast hidden"></div>
 
-<!-- 착석 팝업 — C 담당 -->
-<div id="sitPopup" class="popup-bg">
-  <div class="popup">
-    <h2>좌석 번호 입력</h2>
-    <!-- C: 좌석번호 input + 확인 버튼 -->
-  </div>
-</div>
+<script>
+const stations = [
+  '응암','역촌','불광','독바위','연신내','구산','새절','증산','디지털미디어시티','월드컵경기장','마포구청','망원','합정','상수','광흥창','대흥','공덕','효창공원앞','삼각지','녹사평','이태원','한강진','버티고개','약수','청구','신당','동묘앞','창신','보문','안암','고려대','월곡','상월곡','돌곶이','석계','태릉입구','화랑대','봉화산','신내'
+];
+const totalSeats = 28;
+let currentUser = null;
+let currentRoute = JSON.parse(localStorage.getItem('seat6_route') || 'null');
+let usingPublicCsv = false;
+let publicStats = {}; // key: station|hour -> {board, alight, n}
 
+const demoStats = {
+  '고려대|8':{board:4100,alight:2500,n:1}, '고려대|9':{board:3300,alight:2900,n:1}, '고려대|18':{board:1900,alight:4200,n:1},
+  '공덕|8':{board:7300,alight:8600,n:1}, '공덕|18':{board:9100,alight:7800,n:1}, '공덕|19':{board:7600,alight:6900,n:1},
+  '합정|8':{board:5100,alight:4700,n:1}, '합정|18':{board:7200,alight:6500,n:1}, '합정|19':{board:6600,alight:6100,n:1},
+  '안암|8':{board:2800,alight:2100,n:1}, '안암|18':{board:1400,alight:3100,n:1},
+  '디지털미디어시티|8':{board:6000,alight:6800,n:1}, '디지털미디어시티|18':{board:7200,alight:6300,n:1},
+  '연신내|8':{board:8200,alight:3500,n:1}, '연신내|18':{board:3300,alight:7900,n:1},
+  '이태원|18':{board:4200,alight:3900,n:1}, '이태원|21':{board:5100,alight:4600,n:1},
+  '신내|8':{board:1200,alight:520,n:1}, '신내|18':{board:480,alight:1500,n:1}
+};
 
-<!-- ⚠️ 순서 중요! data.js 가 항상 맨 먼저 -->
-<script src="data.js"></script>
-<script src="app.js"></script>        <!-- 공용 — 아래 내용 -->
-<script src="login.js"></script>      <!-- A 담당 -->
-<script src="detail-left.js"></script><!-- B 담당 -->
-<script src="seatmap.js"></script>    <!-- C 담당 -->
+// 해커톤 시연용 앱 내부 현장 데이터. 실제 버전에서는 Firebase 등에서 불러옵니다.
+const seededLive = [
+  {id:'campus01',start:'안암',end:'공덕',car:3,seat:4,pregnant:false,elderly:false},
+  {id:'line6cat',start:'고려대',end:'합정',car:3,seat:11,pregnant:true,elderly:false},
+  {id:'mango88',start:'보문',end:'대흥',car:5,seat:2,pregnant:false,elderly:true},
+  {id:'purple6',start:'약수',end:'공덕',car:5,seat:15,pregnant:false,elderly:false},
+  {id:'todayseat',start:'신당',end:'합정',car:6,seat:20,pregnant:false,elderly:false},
+  {id:'hello6',start:'고려대',end:'월드컵경기장',car:2,seat:7,pregnant:false,elderly:false}
+];
+if(!localStorage.getItem('seat6_live')) localStorage.setItem('seat6_live',JSON.stringify(seededLive));
 
+function init(){
+  renderLine();
+  fillSelects();
+  buildSeatMap([]);
+  const hour = new Date().getHours();
+  document.getElementById('predictHour').value = String(Math.min(23,Math.max(6,hour)));
+  document.getElementById('predictStation').value = '고려대';
+  predictSeats();
+}
+
+function renderLine(){
+  document.getElementById('stationRow').innerHTML = stations.map(s=>`<div class="station"><div class="station-dot"></div><div class="station-name">${s}</div></div>`).join('');
+}
+function fillSelects(){
+  const opts=stations.map(s=>`<option value="${s}">${s}</option>`).join('');
+  ['predictStation','routeStart','routeEnd'].forEach(id=>document.getElementById(id).innerHTML=opts);
+  document.getElementById('routeEnd').value='공덕';
+  document.getElementById('routeCar').innerHTML=Array.from({length:8},(_,i)=>`<option value="${i+1}">${i+1}번째 칸</option>`).join('');
+  document.getElementById('mySeat').innerHTML=Array.from({length:totalSeats},(_,i)=>`<option value="${i+1}">${i+1}번 좌석</option>`).join('');
+  document.getElementById('predictHour').innerHTML=Array.from({length:18},(_,i)=>i+6).map(h=>`<option value="${h}">${String(h).padStart(2,'0')}:00 ~ ${String((h+1)%24).padStart(2,'0')}:00</option>`).join('');
+}
+function openModal(id){document.getElementById(id).classList.remove('hidden')}
+function closeModal(id){document.getElementById(id).classList.add('hidden')}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2400)}
+
+function signup(){
+  const user={
+    name:suName.value.trim(), age:suAge.value.trim(), gender:suGender.value,
+    id:suId.value.trim(), pw:suPw.value, pregnant:suPregnant.checked, elderly:suElderly.checked
+  };
+  if(!user.name||!user.age||!user.id||!user.pw){toast('필수 정보를 모두 입력해주세요.');return}
+  if(!suAgree.checked){toast('개인정보 동의가 필요합니다.');return}
+  const users=JSON.parse(localStorage.getItem('seat6_users')||'{}');
+  if(users[user.id]){toast('이미 존재하는 아이디입니다.');return}
+  users[user.id]=user;localStorage.setItem('seat6_users',JSON.stringify(users));
+  closeModal('signupModal');toast('회원가입 성공! 이제 로그인할 수 있어요.');
+}
+function login(){
+  const users=JSON.parse(localStorage.getItem('seat6_users')||'{}');
+  const u=users[loginId.value.trim()];
+  if(!u||u.pw!==loginPw.value){toast('아이디 또는 비밀번호를 확인해주세요.');return}
+  currentUser=u;closeModal('loginModal');
+  document.getElementById('screenLanding').classList.add('hidden');document.getElementById('screenMain').classList.remove('hidden');
+  document.getElementById('helloUser').textContent=`${u.id}님`;
+  toast('로그인되었습니다.');
+}
+function showMain(){document.getElementById('screenWaiting').classList.add('hidden');document.getElementById('screenMain').classList.remove('hidden')}
+function showWaiting(){document.getElementById('screenMain').classList.add('hidden');document.getElementById('screenWaiting').classList.remove('hidden');refreshProfiles()}
+
+function saveRoute(){
+  currentRoute={start:routeStart.value,end:routeEnd.value,car:Number(routeCar.value)};
+  localStorage.setItem('seat6_route',JSON.stringify(currentRoute));closeModal('routeModal');refreshProfiles();toast('출발/도착지와 칸을 저장했습니다.');
+}
+function saveSeat(){
+  if(!currentUser){toast('로그인이 필요합니다.');return}
+  if(!currentRoute){toast('먼저 출발/도착지와 칸을 지정해주세요.');closeModal('seatModal');return}
+  let live=JSON.parse(localStorage.getItem('seat6_live')||'[]').filter(x=>x.id!==currentUser.id);
+  live.push({id:currentUser.id,start:currentRoute.start,end:currentRoute.end,car:currentRoute.car,seat:Number(mySeat.value),pregnant:!!currentUser.pregnant,elderly:!!currentUser.elderly,mine:true});
+  localStorage.setItem('seat6_live',JSON.stringify(live));closeModal('seatModal');refreshProfiles();predictSeats();toast('좌석 상태가 업데이트되었습니다.');
+}
+function refreshProfiles(){
+  const label=document.getElementById('currentCarLabel');
+  if(!currentRoute){label.textContent='칸을 지정해주세요';document.getElementById('profileList').innerHTML='<div class="rank-note">출발/도착지 지정 버튼을 눌러 먼저 칸을 선택해주세요.</div>';buildSeatMap([]);return}
+  label.textContent=`${currentRoute.car}번째 칸 · ${currentRoute.start} → ${currentRoute.end}`;
+  const live=JSON.parse(localStorage.getItem('seat6_live')||'[]').filter(x=>Number(x.car)===currentRoute.car);
+  const list=document.getElementById('profileList');
+  if(!live.length){list.innerHTML='<div class="rank-note">현재 등록된 좌석 이용자가 없습니다.</div>'}
+  else list.innerHTML=live.sort((a,b)=>a.seat-b.seat).map(p=>{
+    const cls=p.pregnant&&p.elderly?'both':p.pregnant?'pregnant':p.elderly?'elderly':'';
+    const icon=p.pregnant?'🤰':p.elderly?'🧓':'👤';
+    return `<div class="profile-card ${cls}"><div class="avatar">${icon}</div><div class="profile-main"><b>${escapeHtml(p.id)}</b><div>${escapeHtml(p.start)} → ${escapeHtml(p.end)}</div></div><div class="seat-label">좌석 ${p.seat}</div></div>`
+  }).join('');
+  buildSeatMap(live);
+}
+function buildSeatMap(live){
+  const occupied=new Map(live.map(x=>[Number(x.seat),x]));
+  document.getElementById('seatMap').innerHTML=Array.from({length:totalSeats},(_,i)=>{
+    const n=i+1,p=occupied.get(n);return `<div class="seat ${p?'occupied':''} ${p&&currentUser&&p.id===currentUser.id?'mine':''}">${n}</div>`
+  }).join('');
+}
+
+function getStationStat(station,hour){
+  const key=`${station}|${hour}`;
+  if(usingPublicCsv && publicStats[key]) return publicStats[key];
+  if(demoStats[key]) return demoStats[key];
+  // 데모에서 값이 없는 역/시간도 동작하도록 안정적인 가상 기본값 생성
+  const seed=[...station].reduce((a,c)=>a+c.charCodeAt(0),0)+hour*31;
+  const rush=(hour===8||hour===9||hour===18||hour===19)?1.35:1;
+  const board=Math.round((1300+(seed%3200))*rush);
+  const alight=Math.round((1100+((seed*7)%3000))*(hour>=17?1.18:1));
+  return {board,alight,n:1,demoGenerated:true};
+}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function liveCarMetrics(car,station){
+  const live=JSON.parse(localStorage.getItem('seat6_live')||'[]').filter(x=>Number(x.car)===car);
+  const stationIdx=stations.indexOf(station);
+  let soon=0;
+  live.forEach(x=>{
+    const endIdx=stations.indexOf(x.end);
+    if(endIdx>=0 && stationIdx>=0 && Math.abs(endIdx-stationIdx)<=2) soon++;
+  });
+  return {occupied:live.length,soon};
+}
+function predictSeats(){
+  const station=document.getElementById('predictStation').value;
+  const hour=Number(document.getElementById('predictHour').value||8);
+  const s=getStationStat(station,hour);
+  const board=Math.max(0,Number(s.board)||0), alight=Math.max(0,Number(s.alight)||0);
+  const total=Math.max(1,board+alight);
+  const turnover=alight/total;
+  const crowd=board/total;
+  const base=clamp(35 + turnover*45 - crowd*14,18,76);
+  const carBias=[-2,1,0,2,1,3,0,-1];
+  const results=[];
+  for(let car=1;car<=8;car++){
+    const m=liveCarMetrics(car,station);
+    const p=Math.round(clamp(base + m.soon*7 - m.occupied*1.8 + carBias[car-1],8,92));
+    results.push({car,p,...m});
+  }
+  results.sort((a,b)=>b.p-a.p);
+  const best=results[0];
+  const source = usingPublicCsv && publicStats[`${station}|${hour}`] ? '업로드한 공공데이터' : '데모 통계';
+  const html=`
+    <div class="result-hero">
+      <small>${String(hour).padStart(2,'0')}:00 · ${station} · 추천</small>
+      <div class="big">${best.car}번째 칸</div>
+      <div><span class="prob">${best.p}%</span> <span style="opacity:.9">예상 착석 점수</span></div>
+    </div>
+    <div class="cars">${results.map((r,i)=>`<div class="car-card ${i===0?'best':''}"><strong>${r.car}칸 ${i===0?'⭐':''}</strong><div>${r.p}%</div><div class="meter"><span style="width:${r.p}%"></span></div><div class="small" style="margin-top:7px">곧 하차 ${r.soon} · 등록좌석 ${r.occupied}</div></div>`).join('')}</div>
+    <div class="rank-note">${source} 기준 <b>승차 ${Math.round(board).toLocaleString()}명 / 하차 ${Math.round(alight).toLocaleString()}명</b>을 활용했습니다. 하차 비중이 높을수록 기본 점수가 올라가며, 칸별 차이는 앱 현장정보로 조정됩니다.</div>`;
+  document.getElementById('predictionResult').innerHTML=html;
+}
+
+function parseCSV(text){
+  const rows=[]; let row=[],cell='',quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(ch==='"'){
+      if(quoted && text[i+1]==='"'){cell+='"';i++}else quoted=!quoted;
+    }else if(ch===','&&!quoted){row.push(cell);cell=''}
+    else if((ch==='\n'||ch==='\r')&&!quoted){
+      if(ch==='\r'&&text[i+1]==='\n') i++;
+      row.push(cell);cell=''; if(row.some(v=>v!=='')) rows.push(row);row=[];
+    }else cell+=ch;
+  }
+  if(cell||row.length){row.push(cell);rows.push(row)}
+  return rows;
+}
+function cleanNum(v){return Number(String(v??'').replace(/,/g,'').trim())||0}
+function indexOfAny(headers,names){
+  const norm=headers.map(h=>String(h).trim().toLowerCase().replace(/\s/g,''));
+  for(const n of names){const idx=norm.indexOf(n.toLowerCase().replace(/\s/g,''));if(idx>=0)return idx} return -1;
+}
+function hourColumn(headers,h){
+  const candidates=[`HR${String(h).padStart(2,'0')}`,`${String(h).padStart(2,'0')}-${String((h+1)%24).padStart(2,'0')}시간대`,`${h}-${h+1}시간대`,`${h}시-${h+1}시`,`시간대${h}`];
+  return indexOfAny(headers,candidates);
+}
+async function loadPublicCsv(){
+  const f=document.getElementById('csvFile').files[0];
+  if(!f){toast('CSV 파일을 먼저 선택해주세요.');return}
+  document.getElementById('csvStatus').textContent='CSV를 읽고 6호선 자료를 집계하는 중...';
+  try{
+    const text=await f.text(); const rows=parseCSV(text); if(rows.length<2) throw new Error('CSV 행이 없습니다.');
+    const headers=rows[0].map(x=>x.trim());
+    // 간단 샘플 형식 station,hour,boarding,alighting 지원
+    const sIdx=indexOfAny(headers,['station','역명','STTN']);
+    const simpleHour=indexOfAny(headers,['hour','시간']);
+    const bIdx=indexOfAny(headers,['boarding','승차','승차인원']);
+    const aIdx=indexOfAny(headers,['alighting','하차','하차인원']);
+    const lineIdx=indexOfAny(headers,['호선','호선명','LINE']);
+    const typeIdx=indexOfAny(headers,['승하차구분','GTNF_SE','DIVISIONNAME']);
+    if(sIdx<0) throw new Error('역명(station/역명/STTN) 컬럼을 찾지 못했습니다.');
+    const agg={}; let used=0;
+    if(simpleHour>=0 && bIdx>=0 && aIdx>=0){
+      for(let r=1;r<rows.length;r++){
+        const row=rows[r], st=(row[sIdx]||'').trim(); if(!stations.includes(st)) continue;
+        const h=Number(row[simpleHour]); if(h<6||h>23) continue;
+        const k=`${st}|${h}`; if(!agg[k])agg[k]={board:0,alight:0,n:0};
+        agg[k].board+=cleanNum(row[bIdx]);agg[k].alight+=cleanNum(row[aIdx]);agg[k].n++;used++;
+      }
+    }else if(typeIdx>=0){
+      const hourIdx={};for(let h=6;h<=23;h++){const idx=hourColumn(headers,h);if(idx>=0)hourIdx[h]=idx}
+      if(!Object.keys(hourIdx).length) throw new Error('시간대 컬럼(HR06~HR23 또는 06-07시간대 형식)을 찾지 못했습니다.');
+      for(let r=1;r<rows.length;r++){
+        const row=rows[r];
+        if(lineIdx>=0 && !String(row[lineIdx]||'').includes('6')) continue;
+        const st=(row[sIdx]||'').trim(); if(!stations.includes(st)) continue;
+        const type=String(row[typeIdx]||'').trim(); const isBoard=type.includes('승차')||type.toLowerCase()==='boarding'; const isAlight=type.includes('하차')||type.toLowerCase()==='alighting';
+        if(!isBoard&&!isAlight)continue;
+        for(const [h,idx] of Object.entries(hourIdx)){
+          const k=`${st}|${h}`; if(!agg[k])agg[k]={board:0,alight:0,n:0};
+          if(isBoard)agg[k].board+=cleanNum(row[idx]); if(isAlight)agg[k].alight+=cleanNum(row[idx]); agg[k].n++; used++;
+        }
+      }
+      // 일별 합계를 시간대 평균으로 변환. 승/하차 2행을 고려해 일수 규모에 무관하게 비교 가능하도록 평균 사용
+      Object.values(agg).forEach(v=>{const divisor=Math.max(1,v.n/2);v.board/=divisor;v.alight/=divisor});
+    }else throw new Error('지원하는 CSV 형식이 아닙니다.');
+    if(!Object.keys(agg).length) throw new Error('6호선으로 인식된 데이터가 없습니다.');
+    publicStats=agg;usingPublicCsv=true;
+    document.getElementById('dataSourceState').textContent='공공데이터 CSV 적용됨';
+    document.getElementById('csvStatus').textContent=`완료: ${Object.keys(agg).length.toLocaleString()}개의 역·시간대 통계를 생성했습니다.`;
+    predictSeats();toast('공공데이터 분석이 완료되었습니다.');
+  }catch(e){document.getElementById('csvStatus').textContent=`오류: ${e.message}`;toast('CSV 형식을 확인해주세요.');}
+}
+function resetDemoData(){usingPublicCsv=false;publicStats={};document.getElementById('dataSourceState').textContent='데모 데이터 사용 중';document.getElementById('csvStatus').textContent='';predictSeats();toast('데모 데이터로 돌아왔습니다.')}
+function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+
+init();
+</script>
 </body>
 </html>
