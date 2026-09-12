@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>data.js 테스트</title>
+  <style>
+    body { font-family: sans-serif; padding: 24px; line-height: 1.7; }
+    h2 { margin-top: 28px; border-bottom: 2px solid #333; padding-bottom: 6px; }
+    .card {
+      display: flex; align-items: center; gap: 12px;
+      border: 1px solid #ccc; border-radius: 10px;
+      padding: 10px 14px; margin-bottom: 8px; max-width: 460px;
+    }
+    .card .pic {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #ddd; flex-shrink: 0;
+    }
+    .card .info { flex: 1; }
+    .card .seat { font-weight: bold; color: #666; }
+    .pregnant { background: #ffe0ec; }   /* 임산부 = 연핑크 */
+    .elderly  { background: #fff4cc; }   /* 노약자 = 연노랑 */
+    .ok   { color: green; font-weight: bold; }
+    .fail { color: red;   font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h1>data.js 연결 테스트</h1>
+  <p id="status"></p>
+
+  <h2>1. 6호선 역 개수</h2>
+  <div id="t1"></div>
+
+  <h2>2. 3호차 사람들 (내리는 순서대로 정렬)</h2>
+  <div id="t2"></div>
+
+  <h2>3. 3호차에서 이미 찬 좌석</h2>
+  <div id="t3"></div>
+
+  <!-- 순서 중요! data.js 가 먼저 와야 합니다 -->
+  <script src="data.js"></script>
+  <script>
+    const status = document.getElementById("status");
+
+    // data.js 가 제대로 불러와졌는지 확인
+    if (typeof LINE6 === "undefined") {
+      status.innerHTML =
+        '<span class="fail">✗ data.js 를 못 찾았습니다. ' +
+        '같은 폴더에 data.js 가 있는지 확인하세요.</span>';
+    } else {
+      status.innerHTML = '<span class="ok">✓ data.js 연결 성공!</span>';
+
+      // 테스트 1
+      document.getElementById("t1").textContent =
+        LINE6.length + "개 역 / 첫 역: " + LINE6[0] +
+        " / 마지막 역: " + LINE6[LINE6.length - 1];
+
+      // 테스트 2 — B가 만들 프로필 카드의 최소 버전
+      const people = getPeopleSortedByExit(3);
+      document.getElementById("t2").innerHTML = people.map(p => {
+        let cls = "card";
+        if (p.pregnant) cls += " pregnant";
+        else if (p.elderly) cls += " elderly";
+        return `
+          <div class="${cls}">
+            <div class="pic"></div>
+            <div class="info">
+              <b>${p.id}</b><br>
+              ${p.from} → ${p.to}
+            </div>
+            <div class="seat">${p.sitting ? p.seat + "번" : "대기중"}</div>
+          </div>`;
+      }).join("");
+
+      // 테스트 3 — C가 색칠할 좌석 번호
+      document.getElementById("t3").textContent =
+        getTakenSeats(3).join(", ") + "번 좌석 점유중";
+    }
+  </script>
+
+</body>
+</html>
