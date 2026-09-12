@@ -5,6 +5,237 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#CD7C2F">
   <title>눈치보지마6 — 편안한 이동의 시작</title>
+  <script>
+/* ============================================================
+   [v3] 모바일 호환 + 시연 데이터 + 제보 제한
+   ⚠️ <head> 안, <title> 줄 바로 다음 / <style> 바로 앞에 붙여넣으세요.
+   ============================================================ */
+(function () {
+  var LOG = [];
+  function bar(txt, bg) {
+    function go() {
+      var d = document.getElementById('__ver');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__ver';
+        d.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:2147483647;' +
+          'padding:8px 10px;font:11px/1.5 monospace;white-space:pre-wrap;color:#fff';
+        var x = document.createElement('button');
+        x.appendChild(document.createTextNode('X'));
+        x.style.cssText = 'float:right;background:#fff;color:#000;border:0;border-radius:5px;padding:3px 9px';
+        x.onclick = function () { d.parentNode.removeChild(d); };
+        d.appendChild(x);
+        document.body.insertBefore(d, document.body.firstChild);
+      }
+      d.style.background = bg;
+      var p = document.createElement('div');
+      p.appendChild(document.createTextNode(txt));
+      d.appendChild(p);
+    }
+    if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+  }
+  window.onerror = function (m, f, l, c) { bar('[에러] ' + m + ' (줄 ' + l + ':' + c + ')', '#7a1414'); };
+  window.addEventListener('unhandledrejection', function (e) {
+    bar('[오류] ' + (e.reason && (e.reason.message || e.reason)), '#7a1414');
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var miss = [], fix = [];
+
+    /* ---- 1) crypto.subtle 없음 → 가입·로그인 전체 실패 방지 ---- */
+    if (!(window.crypto && window.crypto.subtle)) {
+      miss.push('crypto.subtle');
+      try {
+        window.passwordProof = function (pw, s) { return Promise.resolve('d$' + s + '$' + pw); };
+        window.encodedPassword = function (pw) { return Promise.resolve({ salt: 'd', proof: 'd$d$' + pw }); };
+        fix.push('비밀번호');
+      } catch (e) {}
+    }
+
+    /* ---- 2) randomUUID 없음 ---- */
+    if (!(window.crypto && window.crypto.randomUUID)) {
+      miss.push('randomUUID');
+      try {
+        if (!window.crypto) window.crypto = {};
+        window.crypto.randomUUID = function () {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0;
+            return (c === 'x' ? r : (r & 3) | 8).toString(16);
+          });
+        };
+        fix.push('randomUUID');
+      } catch (e) {}
+    }
+
+    /* ---- 3) <dialog> 미지원 → 버튼 전부 먹통되는 주원인 ---- */
+    if (typeof document.createElement('dialog').showModal !== 'function') {
+      miss.push('dialog');
+      var st = document.createElement('style');
+      st.appendChild(document.createTextNode(
+        'dialog{display:none!important;position:fixed;left:50%;top:50%;' +
+        'transform:translate(-50%,-50%);max-height:86vh;overflow:auto;z-index:1000}' +
+        'dialog[open]{display:block!important}' +
+        '#__bd{display:none;position:fixed;top:0;left:0;right:0;bottom:0;' +
+        'background:rgba(37,28,22,.65);z-index:999}#__bd.on{display:block}'));
+      document.head.appendChild(st);
+      var bd = document.createElement('div'); bd.id = '__bd'; document.body.appendChild(bd);
+      var n = 0, L = document.querySelectorAll('dialog');
+      for (var i = 0; i < L.length; i++) {
+        (function (d) {
+          d.showModal = function () { this.setAttribute('open', ''); n++; bd.className = 'on'; };
+          d.close = function () {
+            if (!this.hasAttribute('open')) return;
+            this.removeAttribute('open'); n = n > 0 ? n - 1 : 0;
+            if (!n) bd.className = '';
+            var ev = document.createEvent('Event'); ev.initEvent('close', false, false);
+            this.dispatchEvent(ev);
+          };
+          try { Object.defineProperty(d, 'open', {
+            get: function () { return this.hasAttribute('open'); }, configurable: true }); } catch (e) {}
+        })(L[i]);
+      }
+      fix.push('팝업');
+    }
+
+    /* ---- 4) replaceChildren / svh ---- */
+    if (!Element.prototype.replaceChildren) {
+      miss.push('replaceChildren');
+      Element.prototype.replaceChildren = function () {
+        while (this.firstChild) this.removeChild(this.firstChild);
+        for (var i = 0; i < arguments.length; i++) {
+          var a = arguments[i];
+          this.appendChild(typeof a === 'string' ? document.createTextNode(a) : a);
+        }
+      };
+      fix.push('replaceChildren');
+    }
+    if (!(window.CSS && CSS.supports && CSS.supports('height', '100svh'))) {
+      miss.push('svh');
+      var s2 = document.createElement('style');
+      s2.appendChild(document.createTextNode('.page,.app-screen{min-height:100vh}dialog{max-height:86vh}'));
+      document.head.appendChild(s2);
+      fix.push('화면높이');
+    }
+    if (!window.localStorage) miss.push('localStorage');
+
+    /* ---- 5) 1~8호차 시연용 고정 승객 ---- */
+    try {
+      var P = [
+      ['seat_a01','지우',24,'female',0,0,1,3,'응암','공덕'],
+      ['seat_a02','현우',31,'male',0,0,1,11,'연신내','삼각지'],
+      ['seat_a03','보라',34,'female',1,0,1,18,'새절','합정'],
+      ['seat_a04','태식',72,'male',0,1,1,26,'증산','약수'],
+      ['seat_a05','다은',22,'female',0,0,1,40,'망원','고려대'],
+      ['seat_b01','준영',27,'male',0,0,2,5,'디지털미디어시티','신당'],
+      ['seat_b02','세림',29,'female',1,0,2,13,'월드컵경기장','공덕'],
+      ['seat_b03','상훈',45,'male',0,0,2,22,'마포구청','보문'],
+      ['seat_b04','명자',69,'female',0,1,2,31,'합정','석계'],
+      ['seat_b05','유진',23,'female',0,0,2,44,'상수','안암'],
+      ['seat_c01','민석',25,'male',0,0,3,4,'합정','안암'],
+      ['seat_c02','하은',30,'female',1,0,3,11,'망원','공덕'],
+      ['seat_c03','정호',68,'male',0,1,3,21,'응암','석계'],
+      ['seat_c04','서연',27,'female',0,0,3,28,'광흥창','이태원'],
+      ['seat_c05','도윤',33,'male',0,0,3,35,'공덕','고려대'],
+      ['seat_c06','예린',21,'female',0,0,3,42,'삼각지','월곡'],
+      ['seat_c07','강민',38,'male',0,0,3,49,'약수','봉화산'],
+      ['seat_d01','수아',24,'female',0,0,4,7,'녹사평','상월곡'],
+      ['seat_d02','병철',75,'male',0,1,4,16,'이태원','돌곶이'],
+      ['seat_d03','나연',32,'female',1,0,4,24,'한강진','대흥'],
+      ['seat_d04','우진',29,'male',0,0,4,37,'버티고개','화랑대'],
+      ['seat_d05','소희',26,'female',0,0,4,46,'청구','신내'],
+      ['seat_e01','재원',28,'male',0,0,5,2,'신당','합정'],
+      ['seat_e02','미경',71,'female',0,1,5,10,'동묘앞','디지털미디어시티'],
+      ['seat_e03','지훈',35,'male',0,0,5,19,'창신','마포구청'],
+      ['seat_e04','채원',31,'female',1,0,5,27,'보문','공덕'],
+      ['seat_e05','성민',23,'male',0,0,5,38,'안암','상수'],
+      ['seat_f01','동현',30,'male',0,0,6,6,'월곡','효창공원앞'],
+      ['seat_f02','영숙',73,'female',0,1,6,14,'상월곡','삼각지'],
+      ['seat_f03','가은',28,'female',1,0,6,23,'돌곶이','약수'],
+      ['seat_f04','승우',41,'male',0,0,6,33,'석계','신당'],
+      ['seat_f05','주미',22,'female',0,0,6,47,'태릉입구','보문'],
+      ['seat_g01','태호',26,'male',0,0,7,8,'화랑대','청구'],
+      ['seat_g02','복순',78,'female',0,1,7,17,'봉화산','동묘앞'],
+      ['seat_g03','슬기',33,'female',1,0,7,29,'신내','창신'],
+      ['seat_g04','현식',37,'male',0,0,7,39,'독바위','안암'],
+      ['seat_g05','나윤',24,'female',0,0,7,52,'구산','고려대'],
+      ['seat_h01','기영',32,'male',0,0,8,9,'역촌','월곡'],
+      ['seat_h02','순자',70,'female',0,1,8,15,'불광','상월곡'],
+      ['seat_h03','예진',29,'female',1,0,8,25,'연신내','돌곶이'],
+      ['seat_h04','민재',27,'male',0,0,8,33,'새절','석계'],
+      ['seat_h05','아름',23,'female',0,0,8,41,'증산','태릉입구']];
+      var ra = read(KEYS.accounts, []), A = [].concat(ra || []);
+      var rs = read(KEYS.seats, []), S = [].concat(rs || []);
+      var ha = {}, hs = {}, k;
+      for (k = 0; k < A.length; k++) if (A[k] && A[k].userId) ha[A[k].userId] = 1;
+      for (k = 0; k < S.length; k++) if (S[k] && S[k].userId) hs[S[k].userId] = 1;
+      var na = [], ns = [];
+      for (k = 0; k < P.length; k++) {
+        var p = P[k];
+        if (!ha[p[0]]) na.push({ userId: p[0], name: p[1], age: p[2], gender: p[3],
+          password: '1234', pregnant: !!p[4], elderly: !!p[5] });
+        if (!hs[p[0]]) ns.push({ userId: p[0], departure: p[8], arrival: p[9], car: p[6], seat: p[7] });
+      }
+      if (na.length) write(KEYS.accounts, A.concat(na));
+      if (ns.length) write(KEYS.seats, S.concat(ns));
+      fix.push('승객 ' + P.length + '명');
+    } catch (e) { LOG.push('seed:' + e.message); }
+
+    /* ---- 6) 제보는 "내가 탄 칸"만 ---- */
+    try {
+      var rb = document.getElementById('report-button');
+      if (rb) {
+        var nb = rb.cloneNode(true);
+        rb.parentNode.replaceChild(nb, rb);
+        nb.addEventListener('click', function () {
+          if (typeof currentTrip === 'undefined' || !currentTrip || !currentTrip.car) {
+            notify('먼저 출발/도착지와 칸 번호를 지정해주세요.');
+            if (typeof openTrip === 'function') openTrip();
+            return;
+          }
+          openGuestMock(currentTrip.car);
+          var sel = document.getElementById('report-car');
+          if (sel) {
+            sel.value = String(currentTrip.car);
+            var wrap = sel.parentNode;
+            if (wrap) wrap.style.display = 'none';
+            var lab = document.getElementById('guest-car-label');
+            if (lab) lab.textContent = currentTrip.car + '호차 · 내가 탄 칸만 제보할 수 있어요';
+          }
+        });
+        fix.push('제보=내 칸');
+      }
+    } catch (e) { LOG.push('report:' + e.message); }
+
+    /* ---- 7) 1화면에 체험 계정 안내 ---- */
+    try {
+      var lb = document.getElementById('login-button');
+      if (lb && !document.getElementById('__hint')) {
+        var h = document.createElement('div');
+        h.id = '__hint';
+        h.style.cssText = 'background:#fff5e9;border:1px solid #edd6b6;border-radius:12px;' +
+          'padding:12px;margin:0 0 16px;font-size:13px;line-height:1.8;color:#7a5a33;text-align:left';
+        h.innerHTML = '\u2728 <b>체험 계정</b> — 아이디 <b>seat_c01</b> / 비밀번호 <b>1234</b><br>' +
+          '로그인 후 <b>3호차</b>를 입력해 보세요.';
+        lb.parentNode.insertBefore(h, lb);
+      }
+    } catch (e) {}
+
+    /* ---- 8) 비회원 링크로 들어온 경우 다시 열기 (폴리필 이후) ---- */
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.get('guest') === '1') {
+        var c = Number(q.get('car'));
+        if (c >= 1 && c <= 8) openGuestMock(c);
+      }
+    } catch (e) {}
+
+    bar('\u2714 v3 로드됨  |  미지원: ' + (miss.length ? miss.join(', ') : '없음') +
+        '  |  패치: ' + (fix.length ? fix.join(', ') : '없음') +
+        '  |  ' + location.protocol + (LOG.length ? '  |  ' + LOG.join(' / ') : ''), '#14532d');
+  });
+})();
+</script>
+
   <style>
     :root{--accent:#CD7C2F;--dark:#98521c;--ink:#332a24;--muted:#81766c;--paper:#faf8f4;--line:#e8e0d6}
     *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper)}button,input{font:inherit}button{cursor:pointer}button,a,input{ -webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--dark);outline-offset:4px}button{touch-action:manipulation}
