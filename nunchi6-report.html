@@ -24,7 +24,8 @@ select{font:inherit;width:100%;min-height:48px;padding:10px 12px;background:whit
   .route-map{min-width:0;margin-inline:auto;transition:width .18s ease}.map-hint{padding:0 16px 13px;margin:0;font-size:11px;line-height:1.6;color:var(--muted)}
   .guest-seat-picker{margin:16px auto 12px;max-width:330px;padding:14px;border:1px solid var(--line);border-radius:18px;background:#fcfaf7}.guest-seat-picker-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;font-size:12px}.guest-seat-picker-head strong{font-size:13px}.guest-seat-layout{display:grid;grid-template-columns:1fr 50px 1fr;gap:8px;align-items:start}.guest-seat-side{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.guest-aisle{display:grid;place-items:center;min-height:100%;color:#aa9c8c;font-size:10px;writing-mode:vertical-rl;letter-spacing:.22em}.guest-seat-button{min-height:38px;border:1px solid #d7cbbb;border-radius:7px;background:#fff;color:#706455;font-size:11px;font-weight:700}.guest-seat-button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}.guest-seat-button:disabled{background:#eee7dd;color:#9d8f7f;border-color:#ddd2c4;opacity:1}.guest-seat-summary{font-size:11px;line-height:1.7;color:var(--muted);margin:8px 0 16px}.guest-actions{display:flex;flex-wrap:wrap;gap:8px}.guest-actions button,.guest-actions label{flex:1;min-width:130px;text-align:center}.import-label{display:flex;align-items:center;justify-content:center}.direction-note{margin:-4px 0 14px;padding:10px 12px;border-radius:10px;background:#f4eee5;color:#705c47;font-size:11px;line-height:1.6}.share-flow{margin-top:14px;padding:12px;border-radius:12px;background:#eef6ed;color:#4c6647;font-size:11px;line-height:1.7}
 #guest-seat-map .guest-seat-side{grid-template-columns:1fr;gap:4px}#guest-seat-map .guest-seat-button{min-height:44px;width:100%}#guest-seat-map .report-door{height:68px;display:grid;place-items:center;color:#9c8d7d;font-size:11px}.guest-seat-picker{max-height:440px;overflow:auto}.guest-seat-picker-head{position:sticky;top:-14px;background:#fcfaf7;padding:10px 0;z-index:1}#guest-seat-map .guest-aisle{align-self:stretch}#report-updated{color:#21616b}#report-button{background:#CD7C2F;color:white;border-color:#CD7C2F}
-.waiting-car-field{margin:18px 0 12px}.waiting-car-field select{max-width:240px}.alight-order{font-size:12px;color:#287d72;background:#eef6f2;border-radius:8px;padding:8px 10px;margin:9px 0 0}.alight-order.soon{background:#d8eee4;font-weight:800;border-left:3px solid #287d72}</style>
+.waiting-car-field{margin:18px 0 12px}.waiting-car-field select{max-width:240px}.alight-order{font-size:12px;color:#287d72;background:#eef6f2;border-radius:8px;padding:8px 10px;margin:9px 0 0}.alight-order.soon{background:#d8eee4;font-weight:800;border-left:3px solid #287d72}#seat-chooser{display:grid;grid-template-columns:1fr 50px 1fr;max-height:440px;max-width:330px;margin:15px auto;padding:14px;border:1px solid var(--line);border-radius:20px;background:#fcfaf7;gap:8px}.member-seat-side{display:grid;grid-template-columns:1fr;gap:4px}.member-seat-side .seat-option{min-height:44px}.member-seat-side .report-door{height:68px;display:grid;place-items:center;color:#9c8d7d;font-size:11px}.reported-seat{background:#e0f7fa;border-color:#a2d5da}.guest-timer{position:absolute;right:12px;top:10px;color:#21616b;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}.passenger-card.guest .seat-tag{top:32px}.passenger-card.guest{padding-top:35px}#my-profile .passenger-card{border:2px solid #287d72}
+</style>
 </head>
 <body>
   <div class="page">
@@ -59,14 +60,14 @@ select{font:inherit;width:100%;min-height:48px;padding:10px 12px;background:whit
   </section>
   <section class="app-screen waiting-screen hidden" id="waiting-page" aria-labelledby="car-title">
     <div class="screen-shell">
-      <header class="waiting-header"><button class="outline-button" id="trip-button" type="button" aria-haspopup="dialog">출발/도착지 지정 <span aria-hidden="true">↗</span></button><div class="waiting-top-actions"><button class="outline-button" id="car-status-button" type="button" aria-haspopup="dialog">칸 현황 <span aria-hidden="true">▦</span></button><button class="outline-button guest-share-button" id="report-button" type="button" aria-haspopup="dialog">제보하기</button></div></header>
+      <header class="waiting-header"><button class="outline-button" id="trip-button" type="button" aria-haspopup="dialog">출발/도착지 지정 <span aria-hidden="true">↗</span></button><div class="waiting-top-actions"><button class="outline-button guest-share-button" id="report-button" type="button" aria-haspopup="dialog">제보하기</button></div></header>
       <div class="car-heading"><div><p class="screen-eyebrow">WAITING TOGETHER</p><h2 id="car-title" tabindex="-1">칸을 지정해주세요</h2></div><span class="car-chip" id="my-state">대기 중</span></div>
       <div class="field waiting-car-field"><label class="field-label" for="waiting-car">현재 호차 변경</label><select id="waiting-car"><option value="" disabled>호차를 선택해주세요</option><option value="1">1호차</option><option value="2">2호차</option><option value="3">3호차</option><option value="4">4호차</option><option value="5">5호차</option><option value="6">6호차</option><option value="7">7호차</option><option value="8">8호차</option></select><p class="small-note" id="waiting-car-note">호차를 변경하면 해당 칸의 좌석과 착석 프로필이 표시됩니다.</p></div><p class="trip-preview" id="waiting-trip">출발역과 도착역, 현재 탑승한 칸을 알려주세요.</p>
       <p id="report-updated" class="refresh-status" aria-live="polite">아직 제보된 정보가 없습니다.</p>
       <div class="waiting-layout">
         <div>
-          <div class="passenger-header"><h3>이 칸의 착석 프로필</h3><span id="profile-count">0명</span></div>
-          <p class="small-note">하차가 빠른 순 · 지정한 출발역과 이동 방향 기준입니다. 실시간 현재역 기준은 아닙니다. 하차역 미상·경로 밖은 아래에 표시됩니다.</p><div class="passenger-list" id="passenger-list" aria-live="polite"></div>
+          <div class="passenger-header"><h3>내 프로필</h3></div><div id="my-profile" class="passenger-list"></div><div class="passenger-header"><h3>이 칸의 착석 프로필</h3><span id="profile-count">0명</span></div>
+          <p class="small-note">내 도착역과 가까운 하차역 순으로 표시합니다. 하차역을 모르는 비회원은 아래에 표시됩니다.</p><div class="passenger-list" id="passenger-list" aria-live="polite"></div>
           <p class="refresh-status" id="refresh-status" role="status"></p>
           <label class="demo-toggle"><input type="checkbox" id="sample-toggle">예시 프로필 함께 보기 (가상 승객)</label>
           <p class="local-note">이 화면은 같은 브라우저에 등록된 착석 정보를 보여줍니다. 실제 열차의 실시간 정보는 아닙니다. 같은 칸 번호를 하나의 체험 공간으로 사용합니다.</p>
@@ -91,7 +92,7 @@ select{font:inherit;width:100%;min-height:48px;padding:10px 12px;background:whit
     <form id="seat-form" novalidate>
       <label class="check-row"><input id="is-seated" type="checkbox" checked>네, 자리에 앉았어요.</label>
       <div class="field" style="margin-top:17px"><label class="field-label" for="seat-number">좌석 번호</label><input id="seat-number" type="number" min="1" step="1" inputmode="numeric" placeholder="좌석 번호 입력 또는 아래에서 선택"></div>
-      <p class="small-note" id="seat-range"></p><div class="seat-chooser" id="seat-chooser" aria-label="좌석 번호 선택"></div>
+      <p class="small-note" id="seat-range"></p><div class="seat-chooser" id="seat-chooser" tabindex="-1" aria-label="칸 배치도에서 좌석 선택"></div>
       <p class="form-status" id="seat-error" role="alert"></p><button class="primary" type="submit">저장하기</button><button class="secondary" type="button" data-dismiss="seat-dialog">취소</button>
     </form>
   </div></dialog>
@@ -417,10 +418,15 @@ function rideStationOrder(trip){
   }
   return candidates.filter(r=>r.indexOf(end)>0).sort((a,b)=>a.indexOf(end)-b.indexOf(end))[0]||[];
 }
-function alightingDistance(profile){
-  if(profile.type==='guest')return Infinity;
-  const n=rideStationOrder(currentTrip).indexOf(profile.arrival);
-  return n>0?n:Infinity;
+function destinationDistance(profile){
+  if(profile.type==='guest'||!currentTrip||!STATIONS.includes(profile.arrival))return Infinity;
+  const graph=new Map(STATIONS.map(n=>[n,[]]));
+  const connect=(a,b)=>{graph.get(a).push(b);graph.get(b).push(a);};
+  const main=['응암',...STATIONS.slice(6)],loop=[...STATIONS.slice(0,6),'응암'];
+  for(const line of [main,loop])for(let i=1;i<line.length;i++)connect(line[i-1],line[i]);
+  const queue=[[currentTrip.arrival,0]],seen=new Set();
+  for(let i=0;i<queue.length;i++){const [station,n]=queue[i];if(station===profile.arrival)return n;if(seen.has(station))continue;seen.add(station);for(const next of graph.get(station)||[])if(!seen.has(next))queue.push([next,n+1]);}
+  return Infinity;
 }
 function getProfiles() {
   if(!currentTrip) return [];
@@ -435,7 +441,7 @@ function getProfiles() {
     const available=Array.from({length:seatCapacity(currentTrip.car)},(_,i)=>i+1).filter(n=>!rows.some(r=>r.seat===n));
     examples.forEach((p,i)=>{if(available[i]) rows.push({...p,seat:available[i],car:currentTrip.car,departure:'공덕',arrival:'약수',sample:true});});
   }
-  return rows.sort((a,b)=>(alightingDistance(a)-alightingDistance(b))||a.seat-b.seat);
+  return rows.sort((a,b)=>(destinationDistance(a)-destinationDistance(b))||a.seat-b.seat);
 }
 function htmlNode(tag,className,text) {const node=document.createElement(tag); if(className) node.className=className; if(text!==undefined) node.textContent=text; return node;}
 function drawSeats(container,profiles) {
@@ -478,9 +484,11 @@ function renderWaiting() {
   $('waiting-trip').textContent=currentTrip?`${currentTrip.departure} → ${currentTrip.arrival} · 함께하는 이동`:'출발역과 도착역, 현재 탑승한 칸을 알려주세요.';
   $('my-state').textContent=mine?`${mine.seat}번 착석 중`:'대기 중';
   $('sit-button').textContent=mine?'착석 정보 변경':'자리에 앉았나요?';
-  $('profile-count').textContent=`${profiles.length}명${sampleMode?' · 예시 포함':''}`;
+  $('profile-count').textContent=`${profiles.filter(p=>p.userId!==currentUser.userId).length}명${sampleMode?' · 예시 포함':''}`;
   const list=$('passenger-list'); list.replaceChildren();
-  if(!profiles.length) {
+  const myList=$('my-profile');myList.replaceChildren();
+  if(!mine)myList.append(htmlNode('p','local-note',`${currentUser.userId} · 대기 중${currentTrip?' · 도착 '+currentTrip.arrival:''}`));
+  if(!profiles.some(p=>p.userId!==currentUser.userId)) {
     const empty=htmlNode('div','empty-state');
     empty.append(htmlNode('strong','',currentTrip?'아직 등록된 착석자가 없어요.':'먼저 이동 구간을 지정해주세요.'));
     empty.append(htmlNode('p','',currentTrip?'자리에 앉았다면 아래 버튼으로 등록해주세요.':'출발/도착지 지정 버튼에서 칸 번호를 입력하면 프로필과 좌석 현황을 볼 수 있어요.'));
@@ -492,21 +500,24 @@ function renderWaiting() {
     const icon=svgNode('svg',{viewBox:'0 0 32 32'}); icon.append(svgNode('circle',{cx:16,cy:10,r:5}),svgNode('path',{d:'M5 29v-3a11 11 0 0 1 22 0v3'})); avatar.append(icon);
     const info=htmlNode('div','profile-info');
     info.append(htmlNode('h4','profile-id',p.type==='guest'?'비회원 좌석 제보':p.userId),htmlNode('p','profile-route',p.type==='guest'?(p.arrival?`점유 좌석 · 하차 예정 ${p.arrival}`:'점유 좌석 제보'):`출발 ${p.departure} → 도착 ${p.arrival}`));
-    const distance=alightingDistance(p);
-    if(Number.isFinite(distance)){
-      const first=distance===Math.min(...profiles.map(alightingDistance));
-      info.append(htmlNode('p',`alight-order${first?' soon':''}`,`${first?'● 먼저 하차 · ':''}${p.arrival} · 출발역에서 ${distance}정거장`));
-    }else info.append(htmlNode('p','small-note',p.type==='guest'?'하차역 정보 없음':'현재 이동 경로에서 하차 순서 확인 불가'));
+    if(p.userId!==currentUser.userId&&p.type!=='guest'){
+      const distance=destinationDistance(p);
+      if(Number.isFinite(distance))info.append(htmlNode('p','small-note',distance===0?'내 도착역과 같은 역':`내 도착역에서 ${distance}정거장 거리`));
+    }
+    if(p.type==='guest'){
+      const timer=htmlNode('span','guest-timer');timer.dataset.expires=String(Date.parse(p.updatedAt)+REPORT_TTL);timer.setAttribute('aria-label','비회원 제보 남은 시간');card.append(timer);
+    }
     const tags=htmlNode('div','profile-tags');
     if(p.type==='guest') { info.append(htmlNode('p','profile-route',`제보 업데이트 · ${new Date(p.updatedAt).toLocaleString('ko-KR',{hour12:false})}`)); tags.append(htmlNode('span','',`${p.demo?'시연용 더미':'비회원'} 제보 · 10분 유지`)); const remove=htmlNode('button','guest-remove','제보 취소'); remove.type='button'; remove.addEventListener('click',()=>removeGuestReport(p.userId)); info.append(remove); }
     if(p.pregnant) tags.append(htmlNode('span','','임산부'));
     if(p.elderly) tags.append(htmlNode('span','','노약자'));
     if(p.sample) tags.append(htmlNode('span','','예시 프로필'));
     else if(p.userId===currentUser.userId) tags.append(htmlNode('span','','나'));
-    info.append(tags);card.append(avatar,info,htmlNode('span','seat-tag',`좌석 ${String(p.seat).padStart(2,'0')}`));list.append(card);
+    info.append(tags);card.append(avatar,info,htmlNode('span','seat-tag',`좌석 ${String(p.seat).padStart(2,'0')}`));(p.userId===currentUser.userId?myList:list).append(card);
   });
   $('seat-count').textContent=currentTrip?`${profiles.length} / ${seatCapacity(currentTrip.car)} 등록`:'칸 미지정';
   drawSeats($('seat-map-inline'),profiles); drawSeats($('seat-map-modal'),profiles);
+  updateGuestClocks();
   $('status-title').textContent=currentTrip?`${currentTrip.car}호차 · 칸 현황`:'칸 현황';
 }
 function changeWaitingCar(car) {
@@ -520,10 +531,7 @@ function changeWaitingCar(car) {
 }
 $('waiting-car').addEventListener('change',event=>changeWaitingCar(Number(event.target.value)));
 $('sample-toggle').addEventListener('change',()=>{sampleMode=$('sample-toggle').checked;renderWaiting();});
-$('car-status-button').addEventListener('click',()=>{
-  if(!currentTrip) {notify('먼저 출발역, 도착역과 칸을 지정해주세요.');openTrip();return;}
-  renderWaiting();openModal('status-dialog','status-close');
-});
+
 function refreshProfiles() {
   if(!currentUser) return;
   const saved=trips().find(t=>t.userId===currentUser.userId);
@@ -535,17 +543,23 @@ $('refresh-button').addEventListener('click',()=>{refreshProfiles();notify('프�
 window.addEventListener('storage',event=>{if(Object.values(KEYS).includes(event.key)){refreshProfiles();if($('seat-dialog').open)renderSeatChooser();}});
 
 function renderSeatChooser() {
-  if(!currentTrip) return;
-  const selected=Number($('seat-number').value), isSeated=$('is-seated').checked;
-  const occupied=seats().filter(s=>s.car===currentTrip.car&&s.userId!==currentUser.userId&&s.type!=='guest');
-  const chooser=$('seat-chooser');chooser.replaceChildren();
+  if(!currentTrip)return;
+  const car=currentTrip.car,half=seatCapacity(car)/2,selected=Number($('seat-number').value),isSeated=$('is-seated').checked;
   $('seat-number').disabled=!isSeated;
-  for(let n=1;n<=seatCapacity(currentTrip.car);n++) {
-    const button=htmlNode('button','seat-option',String(n)), taken=occupied.some(s=>s.seat===n);
-    button.type='button';button.disabled=taken||!isSeated;
-    button.setAttribute('aria-pressed',String(n===selected));
-    button.setAttribute('aria-label',`${n}번 좌석${taken?' 점유됨':''}`);
-    button.addEventListener('click',()=>{$('seat-number').value=n;renderSeatChooser();});chooser.append(button);
+  const rows=seats().filter(r=>r.car===car),chooser=$('seat-chooser');chooser.replaceChildren();
+  for(let side=0;side<2;side++){
+    if(side===1)chooser.append(htmlNode('div','guest-aisle','통로'));
+    const column=htmlNode('div','member-seat-side');let number=side*half;
+    seatGroups(car).forEach((count,index)=>{
+      for(let i=0;i<count;i++){
+        const n=++number,row=rows.find(r=>r.seat===n),taken=row&&row.type!=='guest'&&row.userId!==currentUser.userId;
+        const button=htmlNode('button',`seat-option${row?.type==='guest'?' reported-seat':''}`,String(n));
+        button.type='button';button.disabled=!!taken||!isSeated;button.setAttribute('aria-pressed',String(selected===n));
+        button.setAttribute('aria-label',`${n}번 좌석${taken?' 회원 착석 중':row?.type==='guest'?' 비회원 제보, 선택 가능':''}`);
+        button.addEventListener('click',()=>{$('seat-number').value=n;renderSeatChooser();chooser.querySelectorAll('button').forEach(b=>{if(b.textContent===String(n))b.focus({preventScroll:true});});});column.append(button);
+      }
+      if(index<seatGroups(car).length-1)column.append(htmlNode('div','report-door','출입문'));
+    });chooser.append(column);
   }
 }
 $('sit-button').addEventListener('click',()=>{
@@ -557,7 +571,7 @@ $('sit-button').addEventListener('click',()=>{
   $('seat-number').max=seatCapacity(currentTrip.car);
   $('seat-dialog-car').textContent=`${currentTrip.car}호차 · ${currentTrip.departure} → ${currentTrip.arrival}`;
   $('seat-range').textContent=`1~${seatCapacity(currentTrip.car)}번 중 선택하세요. 비회원 제보 좌석도 선택할 수 있으며 저장 시 내 좌석으로 바뀝니다. 일어났다면 체크를 해제하고 저장해주세요.`;
-  $('seat-error').textContent='';renderSeatChooser();openModal('seat-dialog','seat-number');
+  $('seat-error').textContent='';renderSeatChooser();openModal('seat-dialog','seat-chooser');
 });
 $('is-seated').addEventListener('change',renderSeatChooser);
 $('seat-number').addEventListener('input',renderSeatChooser);
@@ -689,7 +703,8 @@ function shareFallback(message, url) {
 function guestRequestFile(car){
   const capacity=seatCapacity(car);
   const page=`<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>눈치보지마6 ${car}호차 제보</title><style>*{box-sizing:border-box}body{margin:0;background:#faf8f4;color:#332a24;font-family:system-ui,sans-serif}.wrap{max-width:480px;margin:auto;padding:28px 20px}h1{font-size:27px;margin:0 0 8px}p{color:#75695f;line-height:1.7}.train{display:grid;grid-template-columns:1fr 54px 1fr;gap:8px;padding:15px;background:white;border:1px solid #e8e0d6;border-radius:20px}.side{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.aisle{display:grid;place-items:center;color:#a99a88;font-size:11px;writing-mode:vertical-rl;letter-spacing:.2em}button.seat{min-height:40px;border:1px solid #d7cbbb;border-radius:7px;background:white;color:#665b50;font-weight:700}button.seat[aria-pressed=true]{background:#CD7C2F;color:white;border-color:#CD7C2F}.send{width:100%;min-height:52px;margin-top:18px;border:0;border-radius:13px;background:#CD7C2F;color:white;font-weight:800;font-size:16px}.count{font-weight:700;color:#98521c}#guest-seat-map .guest-seat-side{grid-template-columns:1fr;gap:4px}#guest-seat-map .guest-seat-button{min-height:44px;width:100%}#guest-seat-map .report-door{height:68px;display:grid;place-items:center;color:#9c8d7d;font-size:11px}.guest-seat-picker{max-height:440px;overflow:auto}.guest-seat-picker-head{position:sticky;top:-14px;background:#fcfaf7;padding:10px 0;z-index:1}#guest-seat-map .guest-aisle{align-self:stretch}#report-updated{color:#21616b}#report-button{background:#CD7C2F;color:white;border-color:#CD7C2F}
-.waiting-car-field{margin:18px 0 12px}.waiting-car-field select{max-width:240px}.alight-order{font-size:12px;color:#287d72;background:#eef6f2;border-radius:8px;padding:8px 10px;margin:9px 0 0}.alight-order.soon{background:#d8eee4;font-weight:800;border-left:3px solid #287d72}</style><div class="wrap"><p>눈치보지마6 · 6호선</p><h1>${car}호차 좌석 제보</h1><p>지금 사람이 앉아 있는 좌석을 모두 체크한 뒤 제보 파일을 요청한 사람에게 보내주세요.</p><p class="count" id="count">0석 선택</p><div class="train"><div class="side" id="left"></div><div class="aisle">통로</div><div class="side" id="right"></div></div><button class="send" id="send">제보 파일 보내기</button><p id="status"></p></div><script>const car=${car},capacity=${capacity},half=capacity/2,selected=new Set();function side(id,start,end){const el=document.getElementById(id);for(let n=start;n<=end;n++){const b=document.createElement('button');b.className='seat';b.type='button';b.textContent=n;b.setAttribute('aria-pressed','false');b.onclick=()=>{selected.has(n)?selected.delete(n):selected.add(n);b.setAttribute('aria-pressed',String(selected.has(n)));document.getElementById('count').textContent=selected.size+'석 선택'};el.append(b)}}side('left',1,half);side('right',half+1,capacity);document.getElementById('send').onclick=async()=>{if(!selected.size){document.getElementById('status').textContent='좌석을 하나 이상 선택해주세요.';return}const data={app:'nunchi6',version:1,car,seats:[...selected].sort((a,b)=>a-b),createdAt:new Date().toISOString()},file=new File([JSON.stringify(data,null,2)],'nunchi6-'+car+'호차-제보.json',{type:'application/json'});try{if(!navigator.share||!navigator.canShare?.({files:[file]}))throw Error();await navigator.share({title:'눈치보지마6 좌석 제보',text:car+'호차 점유 좌석 제보입니다.',files:[file]});document.getElementById('status').textContent='제보 파일을 보냈어요.'}catch(e){const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;a.click();document.getElementById('status').textContent='제보 파일을 저장했어요. 요청한 사람에게 보내주세요.'}}<\/script></html>`;
+.waiting-car-field{margin:18px 0 12px}.waiting-car-field select{max-width:240px}.alight-order{font-size:12px;color:#287d72;background:#eef6f2;border-radius:8px;padding:8px 10px;margin:9px 0 0}.alight-order.soon{background:#d8eee4;font-weight:800;border-left:3px solid #287d72}#seat-chooser{display:grid;grid-template-columns:1fr 50px 1fr;max-height:440px;max-width:330px;margin:15px auto;padding:14px;border:1px solid var(--line);border-radius:20px;background:#fcfaf7;gap:8px}.member-seat-side{display:grid;grid-template-columns:1fr;gap:4px}.member-seat-side .seat-option{min-height:44px}.member-seat-side .report-door{height:68px;display:grid;place-items:center;color:#9c8d7d;font-size:11px}.reported-seat{background:#e0f7fa;border-color:#a2d5da}.guest-timer{position:absolute;right:12px;top:10px;color:#21616b;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}.passenger-card.guest .seat-tag{top:32px}.passenger-card.guest{padding-top:35px}#my-profile .passenger-card{border:2px solid #287d72}
+</style><div class="wrap"><p>눈치보지마6 · 6호선</p><h1>${car}호차 좌석 제보</h1><p>지금 사람이 앉아 있는 좌석을 모두 체크한 뒤 제보 파일을 요청한 사람에게 보내주세요.</p><p class="count" id="count">0석 선택</p><div class="train"><div class="side" id="left"></div><div class="aisle">통로</div><div class="side" id="right"></div></div><button class="send" id="send">제보 파일 보내기</button><p id="status"></p></div><script>const car=${car},capacity=${capacity},half=capacity/2,selected=new Set();function side(id,start,end){const el=document.getElementById(id);for(let n=start;n<=end;n++){const b=document.createElement('button');b.className='seat';b.type='button';b.textContent=n;b.setAttribute('aria-pressed','false');b.onclick=()=>{selected.has(n)?selected.delete(n):selected.add(n);b.setAttribute('aria-pressed',String(selected.has(n)));document.getElementById('count').textContent=selected.size+'석 선택'};el.append(b)}}side('left',1,half);side('right',half+1,capacity);document.getElementById('send').onclick=async()=>{if(!selected.size){document.getElementById('status').textContent='좌석을 하나 이상 선택해주세요.';return}const data={app:'nunchi6',version:1,car,seats:[...selected].sort((a,b)=>a-b),createdAt:new Date().toISOString()},file=new File([JSON.stringify(data,null,2)],'nunchi6-'+car+'호차-제보.json',{type:'application/json'});try{if(!navigator.share||!navigator.canShare?.({files:[file]}))throw Error();await navigator.share({title:'눈치보지마6 좌석 제보',text:car+'호차 점유 좌석 제보입니다.',files:[file]});document.getElementById('status').textContent='제보 파일을 보냈어요.'}catch(e){const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;a.click();document.getElementById('status').textContent='제보 파일을 저장했어요. 요청한 사람에게 보내주세요.'}}<\/script></html>`;
   return new File([page],`nunchi6-${car}호차-제보요청.html`,{type:'text/html'});
 }
 $('report-button').addEventListener('click',()=>openGuestMock());
@@ -774,7 +789,7 @@ function renderPrediction() {
   carSection.append(htmlNode('h3','',winners.length?`${winners.join('·')}호차에 하차 예정 제보가 가장 많아요`:'칸 추천은 제보를 기다리고 있어요'));
   carSection.append(htmlNode('p','prediction-meta',`${best.station} 하차 제보 기준 · 최근 10분의 현재 브라우저 정보. 위 시간대 통계와 별도 참고용이며, 모의 제보 포함·방향 미확인입니다.`));
   const grid=htmlNode('div','prediction-cars');
-  cars.forEach(car=>{const item=htmlNode('div',`prediction-car${winners.includes(car.car)?' best':''}`);item.append(htmlNode('strong','',`${car.car}호차`),htmlNode('small','',`하차 제보 ${car.alighting}명`),htmlNode('small','',`최근 등록 ${car.registered}명`));grid.append(item);});
+  cars.forEach(car=>{const item=htmlNode('div',`prediction-car${winners.includes(car.car)?' best':''}`);item.append(htmlNode('strong','',`${car.car}호차`),htmlNode('small','',`최근 등록 ${car.registered}명`));grid.append(item);});
   carSection.append(grid,htmlNode('p','prediction-notice',max?'하차 예정 제보가 같은 칸은 공동 추천입니다. 비어 보이는 미등록 좌석을 실제 빈자리로 간주하지 않습니다.':'제보가 없어 1~8호차의 우열을 판단할 수 없습니다. 공공데이터에는 칸별 착석 확률이 없습니다.'));
   result.append(carSection);
 }
@@ -798,6 +813,26 @@ if (incomingGuest.get('guest') === '1') {
   else notify('제보 링크의 칸 번호가 올바르지 않습니다.');
 }
 window.addEventListener('storage',event=>{if(event.key===KEYS.seats&&$('predict-dialog').open)renderPrediction();});
+function updateGuestClocks(){
+  document.querySelectorAll('.guest-timer').forEach(el=>{
+    const seconds=Math.max(0,Math.ceil((Number(el.dataset.expires)-Date.now())/1000));
+    el.textContent=`◷ ${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;
+  });
+}
+function expireGuestReports(){
+  const rows=read(KEYS.seats,[]);if(!Array.isArray(rows))return;
+  const kept=rows.filter(r=>r.type!=='guest'||isFreshReport(r));
+  if(kept.length!==rows.length){
+    write(KEYS.seats,kept);
+    if(currentUser)renderWaiting();
+    if($('seat-dialog').open)renderSeatChooser();
+    if($('guest-dialog').open)renderGuestSeatPicker();
+    if($('predict-dialog').open)renderPrediction();
+  }
+  updateGuestClocks();
+}
+setInterval(expireGuestReports,1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)expireGuestReports();});
 setInterval(()=>{if(currentUser&&!$('waiting-page').classList.contains('hidden'))renderWaiting();if($('predict-dialog').open)renderPrediction();},30000);
   </script>
 </body>
