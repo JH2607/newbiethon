@@ -196,6 +196,98 @@ function seats() {
   const rows = read(KEYS.seats, []);
   return Array.isArray(rows) ? rows.filter(r => validGuest(r) || (r && r.type !== 'guest' && typeof r.userId === 'string' && validTrip(r) && Number.isInteger(r.seat) && r.seat > 0 && r.seat <= seatCapacity(r.car))) : [];
 }
+  /* ============================================================
+   시연용 고정 승객 데이터 — 1호차부터 8호차까지 모두 배치
+   [아이디, 이름, 나이, 성별, 임산부, 노약자, 칸, 좌석, 출발, 도착]
+   ============================================================ */
+const DEMO_PEOPLE = [
+  // ── 1호차 ──
+  ['seat_a01','지우',24,'female',false,false, 1, 3,'응암','공덕'],
+  ['seat_a02','현우',31,'male',  false,false, 1,11,'연신내','삼각지'],
+  ['seat_a03','보라',34,'female',true, false, 1,18,'새절','합정'],
+  ['seat_a04','태식',72,'male',  false,true,  1,26,'증산','약수'],
+  ['seat_a05','다은',22,'female',false,false, 1,40,'망원','고려대'],
+
+  // ── 2호차 ──
+  ['seat_b01','준영',27,'male',  false,false, 2, 5,'디지털미디어시티','신당'],
+  ['seat_b02','세림',29,'female',true, false, 2,13,'월드컵경기장','공덕'],
+  ['seat_b03','상훈',45,'male',  false,false, 2,22,'마포구청','보문'],
+  ['seat_b04','명자',69,'female',false,true,  2,31,'합정','석계'],
+  ['seat_b05','유진',23,'female',false,false, 2,44,'상수','안암'],
+  ['seat_b06','건희',26,'male',  false,false, 2,50,'대흥','태릉입구'],
+
+  // ── 3호차 (시연 추천 칸) ──
+  ['seat_c01','민석',25,'male',  false,false, 3, 4,'합정','안암'],
+  ['seat_c02','하은',30,'female',true, false, 3,11,'망원','공덕'],
+  ['seat_c03','정호',68,'male',  false,true,  3,21,'응암','석계'],
+  ['seat_c04','서연',27,'female',false,false, 3,28,'광흥창','이태원'],
+  ['seat_c05','도윤',33,'male',  false,false, 3,35,'공덕','고려대'],
+  ['seat_c06','예린',21,'female',false,false, 3,42,'삼각지','월곡'],
+  ['seat_c07','강민',38,'male',  false,false, 3,49,'약수','봉화산'],
+
+  // ── 4호차 ──
+  ['seat_d01','수아',24,'female',false,false, 4, 7,'녹사평','상월곡'],
+  ['seat_d02','병철',75,'male',  false,true,  4,16,'이태원','돌곶이'],
+  ['seat_d03','나연',32,'female',true, false, 4,24,'한강진','대흥'],
+  ['seat_d04','우진',29,'male',  false,false, 4,37,'버티고개','화랑대'],
+  ['seat_d05','소희',26,'female',false,false, 4,46,'청구','신내'],
+
+  // ── 5호차 ──
+  ['seat_e01','재원',28,'male',  false,false, 5, 2,'신당','합정'],
+  ['seat_e02','미경',71,'female',false,true,  5,10,'동묘앞','디지털미디어시티'],
+  ['seat_e03','지훈',35,'male',  false,false, 5,19,'창신','마포구청'],
+  ['seat_e04','채원',31,'female',true, false, 5,27,'보문','공덕'],
+  ['seat_e05','성민',23,'male',  false,false, 5,38,'안암','상수'],
+  ['seat_e06','혜리',25,'female',false,false, 5,45,'고려대','망원'],
+
+  // ── 6호차 ──
+  ['seat_f01','동현',30,'male',  false,false, 6, 6,'월곡','효창공원앞'],
+  ['seat_f02','영숙',73,'female',false,true,  6,14,'상월곡','삼각지'],
+  ['seat_f03','가은',28,'female',true, false, 6,23,'돌곶이','약수'],
+  ['seat_f04','승우',41,'male',  false,false, 6,33,'석계','신당'],
+  ['seat_f05','주미',22,'female',false,false, 6,47,'태릉입구','보문'],
+
+  // ── 7호차 ──
+  ['seat_g01','태호',26,'male',  false,false, 7, 8,'화랑대','청구'],
+  ['seat_g02','복순',78,'female',false,true,  7,17,'봉화산','동묘앞'],
+  ['seat_g03','슬기',33,'female',true, false, 7,29,'신내','창신'],
+  ['seat_g04','현식',37,'male',  false,false, 7,39,'독바위','안암'],
+  ['seat_g05','나윤',24,'female',false,false, 7,52,'구산','고려대'],
+
+  // ── 8호차 ──
+  ['seat_h01','기영',32,'male',  false,false, 8, 9,'역촌','월곡'],
+  ['seat_h02','순자',70,'female',false,true,  8,15,'불광','상월곡'],
+  ['seat_h03','예진',29,'female',true, false, 8,25,'연신내','돌곶이'],
+  ['seat_h04','민재',27,'male',  false,false, 8,33,'새절','석계'],
+  ['seat_h05','아름',23,'female',false,false, 8,41,'증산','태릉입구']
+];
+
+function seedDemoPassengers() {
+  const rawAcc = read(KEYS.accounts, []);
+  const accList = Array.isArray(rawAcc) ? rawAcc : [];
+  const hasAcc = new Set(accList.map(a => a && a.userId));
+
+  const rawSeat = read(KEYS.seats, []);
+  const seatList = Array.isArray(rawSeat) ? rawSeat : [];
+  const hasSeat = new Set(seatList.map(r => r && r.userId));
+
+  const newAccounts = [], newSeats = [];
+
+  for (const [id, name, age, gender, pregnant, elderly, car, seat, from, to] of DEMO_PEOPLE) {
+    if (!hasAcc.has(id)) {
+      newAccounts.push({ userId:id, name, age, gender, password:'1234', pregnant, elderly });
+    }
+    if (!hasSeat.has(id)) {
+      newSeats.push({ userId:id, departure:from, arrival:to, car, seat });
+    }
+  }
+
+  if (newAccounts.length) write(KEYS.accounts, [...accList, ...newAccounts]);
+  if (newSeats.length)    write(KEYS.seats,    [...seatList, ...newSeats]);
+}
+seedDemoPassengers();
+
+}
 function notify(message) {
   $('toast').textContent = message;
   $('toast').classList.remove('hidden');
