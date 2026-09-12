@@ -167,6 +167,35 @@ function seatCapacity(car) { return car === 1 || car === 8 ? 48 : 54; }
 function seats() {
   const rows = read(KEYS.seats, []);
   return Array.isArray(rows) ? rows.filter(r => r && typeof r.userId === 'string' && validTrip(r) && Number.isInteger(r.seat) && r.seat > 0 && r.seat <= seatCapacity(r.car)) : [];
+  /* ---- 시연용 가상 승객 ---- */
+const DEMO_ACCOUNTS = [
+  {userId:'campus01', name:'지민', age:23, gender:'female', password:'1234', pregnant:false, elderly:false},
+  {userId:'line6cat', name:'하은', age:31, gender:'female', password:'1234', pregnant:true,  elderly:false},
+  {userId:'mango88',  name:'정호', age:68, gender:'male',   password:'1234', pregnant:false, elderly:true },
+  {userId:'purple6',  name:'서연', age:27, gender:'female', password:'1234', pregnant:false, elderly:false},
+  {userId:'todayseat',name:'민규', age:25, gender:'male',   password:'1234', pregnant:false, elderly:false},
+  {userId:'hello6',   name:'수아', age:22, gender:'female', password:'1234', pregnant:false, elderly:false}
+];
+const DEMO_SEATS = [
+  {userId:'campus01', departure:'안암',   arrival:'공덕',         car:3, seat:4},
+  {userId:'line6cat', departure:'고려대', arrival:'합정',         car:3, seat:11},
+  {userId:'mango88',  departure:'보문',   arrival:'대흥',         car:3, seat:21},
+  {userId:'purple6',  departure:'약수',   arrival:'공덕',         car:5, seat:15},
+  {userId:'todayseat',departure:'신당',   arrival:'합정',         car:6, seat:20},
+  {userId:'hello6',   departure:'고려대', arrival:'월드컵경기장', car:2, seat:7}
+];
+function seedDemo() {
+  const acc = read(KEYS.accounts, []);
+  const list = Array.isArray(acc) ? acc : [];
+  const has = new Set(list.map(a => a.userId));
+  write(KEYS.accounts, [...list, ...DEMO_ACCOUNTS.filter(a => !has.has(a.userId))]);
+
+  const sit = read(KEYS.seats, []);
+  const rows = Array.isArray(sit) ? sit : [];
+  const seated = new Set(rows.map(r => r.userId));
+  write(KEYS.seats, [...rows, ...DEMO_SEATS.filter(r => !seated.has(r.userId))]);
+}
+seedDemo();
 }
 function notify(message) {
   $('toast').textContent = message;
